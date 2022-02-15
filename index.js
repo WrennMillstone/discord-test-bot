@@ -5,9 +5,12 @@ const { token } = require('./config.json');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 client.commands = new Collection();
+
+//create an array containing the all of the commands and events created within the specified folders
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
 
+//takes the array of commands from previous step and iterates through it, registering each one with the created client
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
 	// Set a new item in the Collection
@@ -15,8 +18,10 @@ for (const file of commandFiles) {
 	client.commands.set(command.data.name, command);
 }
 
+//takes the array of events from previous step and iterates through it, registering each one with the created client 
 for (const file of eventFiles) {
 	const event = require(`./events/${file}`);
+	//flags Once if it is specified true in the event file
 	if (event.once) {
 		client.once(event.name, (...args) => event.execute(...args));
 	} else {
