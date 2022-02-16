@@ -1,4 +1,15 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const ytdl = require('ytdl-core');
+const {
+  AudioPlayerStatus,
+  StreamType,
+  createAudioPlayer,
+  createAudioResource,
+  joinVoiceChannel,
+} = require('@discordjs/voice');
+const { Guild } = require('discord.js');
+
+
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,34 +21,23 @@ module.exports = {
         .setRequired(true)),
   async execute(interaction) {
     const url = interaction.options.getString('url');
+    const user = await interaction.member.fetch();
+    const channel = await user.voice.channel;
 
-    const ytdl = require('ytdl-core');
 
-    const {
-      AudioPlayerStatus,
-      StreamType,
-      createAudioPlayer,
-      createAudioResource,
-      joinVoiceChannel,
-    } = require('@discordjs/voice');
-
-    // ...
-
-    const { voiceChannel } = interaction.user;
-
-    if (!voiceChannel) {
-        return interaction.reply('please join a voice channel first!');
+    if (!channel) {
+      interaction.reply('you are not in a voice channel');
     }
 
     const connection = joinVoiceChannel({
-      channelId: voiceChannel.id,
-      guildId: guild.id,
-      adapterCreator: guild.voiceAdapterCreator,
+      channelId: channel,
+      guildId: interaction.guildId,
+      adapterCreator: Guild.voiceAdapterCreator,
     });
 
     
 
-    const stream = ytdl({url}, { filter: 'audioonly' });
+    const stream = ytdl(url, { filter: 'audioonly' });
     const resource = createAudioResource(stream, { inputType: StreamType.Arbitrary });
     const player = createAudioPlayer();
 
